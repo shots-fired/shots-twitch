@@ -1,4 +1,4 @@
-package shots_twitch
+package main
 
 import (
 	"fmt"
