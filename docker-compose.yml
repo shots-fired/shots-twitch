@@ -1,0 +1,7 @@
+version: '3'
+services:
+    twitch:
+        build: .
+        restart: always
+        ports:
+        - "3375:3375"
