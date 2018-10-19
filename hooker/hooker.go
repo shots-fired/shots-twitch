@@ -9,7 +9,7 @@ type (
 	Hooker interface {
 		AddStreamer(name string) error
 		AddStreamers(names []string) []error
-		RemoveStreamer(name)
+		RemoveStreamer(name string)
 	}
 
 	hooker struct {
@@ -21,7 +21,7 @@ type (
 func NewHooker(clientID string) Hooker {
 	return hooker{
 		clientID:          clientID,
-		streamerEncodings: []streamerEncoding,
+		streamerEncodings: []streamerEncoding{},
 	}
 }
 
@@ -34,9 +34,9 @@ func (h hooker)AddStreamers(names []string) []error{
 }
 
 func (h hooker)AddStreamer(name string) error{
-
+	panic("implement me")
 }
 
-func (h hooker) RemoveStreamer(interface{}) {
+func (h hooker) RemoveStreamer(name string) {
 	panic("implement me")
 }
