@@ -25,7 +25,7 @@ func NewHooker(clientID string) Hooker {
 	}
 }
 
-func (h hooker)AddStreamers(names []string) []error{
+func (h hooker) AddStreamers(names []string) []error{
 	var errors []error
 	for _, name := range names {
 		errors = append(errors, h.AddStreamer(name))
@@ -33,7 +33,7 @@ func (h hooker)AddStreamers(names []string) []error{
 	return errors
 }
 
-func (h hooker)AddStreamer(name string) error{
+func (h hooker) AddStreamer(name string) error{
 	panic("implement me")
 }
 
