@@ -21,7 +21,7 @@ type (
 func NewHooker(clientID string) Hooker {
 	return hooker{
 		clientID:          clientID,
-		streamerEncodings: []streamerEncoding,
+		streamerEncodings: []streamerEncoding{},
 	}
 }
 
