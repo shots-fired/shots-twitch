@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/shots-fired/shots-twitch/payloads"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -44,25 +46,45 @@ func (h hooker) AddStreamers(names []string) []error {
 }
 
 func (h hooker) AddStreamer(name string) error {
+	client := &http.Client{}
+
 	// Because webhooks require a user_id instead of a user_name we must find these from the api ourselves
-	getUserInfoResp, getUserInfoErr := http.Get(UserInfoUrl + "?login=" + name)
-	if getUserInfoErr != nil {
-		return getUserInfoErr
+	req, _ := http.NewRequest("GET", UserInfoUrl+"?login="+name, nil)
+	req.Header.Add("Client-ID", h.clientID)
+	resp, _ := client.Do(req)
+
+	out := name + " User Info :> " + resp.Status
+	if resp.Status != "200 OK" {
+		body, _ := ioutil.ReadAll(resp.Body)
+		out += string(body)
 	}
-	fmt.Println(getUserInfoResp)
+	fmt.Println(out)
+
+	var userInfoPayload map[string][]payloads.UserInfo
+	defer resp.Body.Close()
+	json.NewDecoder(resp.Body).Decode(&userInfoPayload)
+	h.streamerEncodings[name] = userInfoPayload["data"][0].Id
 
 	// Now we need to construct the sub request to the webhook server
 	values := map[string]string{
+		"hub.mode": "subscribe",
 		"hub.topic":         StreamStatusUrl + "?user_id=" + h.streamerEncodings[name],
 		"hub.callback":      h.callbackURL,
 		"hub.lease_seconds": "600",
 	}
 	valuesJSON, _ := json.Marshal(values)
-	postWebhookResp, postWebhookErr:= http.Post(WebhookUrl, "application/json", bytes.NewBuffer(valuesJSON))
-	if postWebhookErr != nil {
-		return postWebhookErr
+
+	req, _ = http.NewRequest("POST", WebhookUrl, bytes.NewBuffer(valuesJSON))
+	req.Header.Add("Client-ID", h.clientID)
+	req.Header.Add("Content-Type", "application/json")
+	resp, _ = client.Do(req)
+
+	out = name + " Webhook Req :> " + resp.Status
+	if resp.Status != "202 Accepted" {
+		body, _ := ioutil.ReadAll(resp.Body)
+		out += string(body)
 	}
-	fmt.Println(name + ":> " + string(postWebhookResp.StatusCode))
+	fmt.Println(out)
 	return nil
 }
 
