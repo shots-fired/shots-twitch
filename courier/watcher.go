@@ -17,31 +17,43 @@ type (
 
 	watcher struct {
 		userLogin string
-		keepWatch bool
+		keepWatch chan bool
 	}
 )
 
 func NewWatcher(userLogin string) Watcher {
 	w := watcher{
 		userLogin: userLogin,
-		keepWatch: true,
+		keepWatch: make(chan bool),
 	}
 	go w.watch()
 	return w
 }
 
 func (w watcher) Start() {
-	w.keepWatch = true
-
+	select {
+	case w.keepWatch <- true:
+	default:
+	}
 }
 
 func (w watcher) Stop() {
-	w.keepWatch = false
+	select {
+	case w.keepWatch <- false:
+	default:
+	}
 }
 
 func (w watcher) watch() {
-	for w.keepWatch {
-		for range time.Tick(15 * time.Second) {
+	keepWatch := <- w.keepWatch
+	ticker := time.NewTicker(15 * time.Second)
+	for range ticker.C {
+		select {
+		case keepWatch = <-w.keepWatch:
+		default:
+		}
+
+		if keepWatch {
 			w.RelayStatus()
 		}
 	}

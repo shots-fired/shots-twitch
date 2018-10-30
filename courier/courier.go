@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/shots-fired/shots-twitch/payloads"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -22,9 +21,7 @@ func handleStreamEvent(writer http.ResponseWriter, req *http.Request) {
 
 	userLogin := mux.Vars(req)["login"]
 
-	out := userLogin + " Stream Event Recieved :> "
-	body, _ := ioutil.ReadAll(req.Body)
-	out += string(body)
+	out := userLogin + " :> Stream Event Received"
 	fmt.Println(out)
 
 	_, ok := watchers[userLogin]
