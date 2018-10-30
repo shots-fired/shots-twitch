@@ -24,7 +24,7 @@ type (
 func NewWatcher(userLogin string) Watcher {
 	w := watcher{
 		userLogin: userLogin,
-		keepWatch: make(chan bool),
+		keepWatch: make(chan bool, 1),
 	}
 	go w.watch()
 	return w
@@ -47,14 +47,19 @@ func (w watcher) Stop() {
 func (w watcher) watch() {
 	keepWatch := <- w.keepWatch
 	ticker := time.NewTicker(15 * time.Second)
-	for range ticker.C {
+	for {
 		select {
 		case keepWatch = <-w.keepWatch:
+			return
 		default:
 		}
 
-		if keepWatch {
-			w.RelayStatus()
+		select {
+		case <- ticker.C:
+			if keepWatch {
+				w.RelayStatus()
+			}
+		default:
 		}
 	}
 }

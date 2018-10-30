@@ -21,9 +21,7 @@ func handleStreamEvent(writer http.ResponseWriter, req *http.Request) {
 
 	userLogin := mux.Vars(req)["login"]
 
-	out := userLogin + " :> Stream Event Received"
-	fmt.Println(out)
-
+	out := userLogin + " :> Stream Event Received - "
 	_, ok := watchers[userLogin]
 
 	if !ok {
@@ -38,10 +36,14 @@ func handleStreamEvent(writer http.ResponseWriter, req *http.Request) {
 
 	if len(data) == 0 {
 		w.Stop()
-		fmt.Println(userLogin + " :> Stream Stopped")
+		out += "Stream Stopped"
 	} else if len(data) == 1{
 		w.Start()
+		out += data[0].Type
 	} else {
 		panic( "Single streamer " + userLogin + " returned multiple data")
 	}
+
+	fmt.Println(out)
+
 }
